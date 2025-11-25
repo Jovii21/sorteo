@@ -455,7 +455,7 @@ const AdminPanel = () => {
       {draws.length > 0 && (
         <Card sx={{ mb: 3, bgcolor: 'background.paper', boxShadow: 2 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom color="primary">
+            <Typography variant="h6" gutterBottom className="text-primary" style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>
               Sorteos guardados
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

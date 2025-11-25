@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -14,13 +14,21 @@ import {
   Tooltip
 } from '@mui/material';
 import { ContentCopy, Link as LinkIcon } from '@mui/icons-material';
-import { getDrawResult, clearDraw } from '../utils/storage';
+import { getDrawResult, getDrawList, clearDraw } from '../utils/storage';
 import type { Assignment } from '../types';
 
 const LinksView = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [draws, setDraws] = useState(getDrawList());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDraws(getDrawList());
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLoadLinks = () => {
     const drawResult = getDrawResult();
@@ -28,6 +36,7 @@ const LinksView = () => {
       setAssignments(drawResult.assignments);
       setLoaded(true);
     }
+    setDraws(getDrawList());
   };
 
   const generateLink = (token: string): string => {
@@ -56,6 +65,22 @@ const LinksView = () => {
       <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
         Enlaces para Participantes
       </Typography>
+
+      <Box sx={{ mt: 2, mb: 2 }}>
+        <Typography variant="h6" className="text-primary" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+          Sorteos guardados
+        </Typography>
+        <List>
+          {draws.map(draw => (
+            <ListItem key={draw.id}>
+              <ListItemText
+                primary={draw.name ? draw.name : 'Sorteo'}
+                secondary={draw.createdAt ? new Date(draw.createdAt).toLocaleString() : ''}
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Box>
 
       {!loaded ? (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
