@@ -26,6 +26,14 @@ const LinksView = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setDraws(getDrawList());
+      const drawResult = getDrawResult();
+      if (drawResult) {
+        setAssignments(drawResult.assignments);
+        setLoaded(true);
+      } else {
+        setAssignments([]);
+        setLoaded(false);
+      }
     }, 2000);
     return () => clearInterval(interval);
   }, []);
