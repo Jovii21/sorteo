@@ -18,34 +18,15 @@ import { getDrawResult, getDrawList, clearDraw } from '../utils/storage';
 import type { Assignment } from '../types';
 
 const LinksView = () => {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [draws, setDraws] = useState(getDrawList());
 
   useEffect(() => {
     const interval = setInterval(() => {
       setDraws(getDrawList());
-      const drawResult = getDrawResult();
-      if (drawResult) {
-        setAssignments(drawResult.assignments);
-        setLoaded(true);
-      } else {
-        setAssignments([]);
-        setLoaded(false);
-      }
     }, 2000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleLoadLinks = () => {
-    const drawResult = getDrawResult();
-    if (drawResult) {
-      setAssignments(drawResult.assignments);
-      setLoaded(true);
-    }
-    setDraws(getDrawList());
-  };
 
   const generateLink = (token: string): string => {
     return `${window.location.origin}/result/${token}`;
