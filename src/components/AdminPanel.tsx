@@ -16,25 +16,27 @@ import {
   Typography,
   Alert,
   Snackbar,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { Add, Delete, Casino } from '@mui/icons-material';
-import type { Participant, Restriction } from '../types';
+import type { Participant, Restriction, DrawResult } from '../types';
 import { performDraw } from '../utils/drawEngine';
-import { saveDrawResult } from '../utils/storage';
+import { saveDrawResult, getDrawList, getActiveDrawId, setActiveDrawId, clearDraws } from '../utils/storage';
+import { texts } from '../constants/texts';
+import '../styles/colors.scss';
 
 const AdminPanel = () => {
   // Participantes por defecto
   const defaultNames = [
     'Segundo', 'Dorys', 'Carlos', 'Susanita', 'Juni', 'Ita', 'Jeank', 'Keyla', 'Charlie', 'Grace', 'Freddy', 'Ivo', 'George'
   ];
-  const defaultParticipants: Participant[] = defaultNames.map((name, idx) => ({
+  const defaultParticipants = defaultNames.map((name, idx) => ({
     id: `p-${idx}`,
     name
   }));
-
-  // Restricciones por defecto
-  const defaultRestrictions: Restriction[] = [
+  const defaultRestrictions = [
     { participantId: 'p-0', cannotGiveTo: ['p-1'] }, // Segundo no a Dorys
     { participantId: 'p-1', cannotGiveTo: ['p-0'] }, // Dorys no a Segundo
     { participantId: 'p-9', cannotGiveTo: ['p-10'] }, // Grace no a Freddy
@@ -51,14 +53,17 @@ const AdminPanel = () => {
     { participantId: 'p-8', cannotGiveTo: ['p-4','p-5','p-6','p-7'] }, // Charlie
   ];
 
-  const [participants, setParticipants] = useState<Participant[]>(defaultParticipants);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentName, setCurrentName] = useState('');
-  const [restrictions, setRestrictions] = useState<Restriction[]>(defaultRestrictions);
+  const [restrictions, setRestrictions] = useState<Restriction[]>([]);
   const [selectedParticipant, setSelectedParticipant] = useState('');
   const [selectedRestrictions, setSelectedRestrictions] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [drawCompleted, setDrawCompleted] = useState(false);
+  const [draws, setDraws] = useState<DrawResult[]>(getDrawList());
+  const [activeDrawId, setActiveDrawIdState] = useState<string | null>(getActiveDrawId());
+  const [listName, setListName] = useState('');
 
   const handleAddParticipant = () => {
     if (!currentName.trim()) {
@@ -158,61 +163,212 @@ const AdminPanel = () => {
     setSelectedRestrictions(typeof value === 'string' ? value.split(',') : value);
   };
 
+  const handleSelectDraw = (id: string) => {
+    setActiveDrawId(id);
+    setActiveDrawIdState(id);
+  };
+
+  const handleClearAllDraws = () => {
+    clearDraws();
+    setDraws([]);
+    setActiveDrawIdState(null);
+  };
+
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom align="center" color="primary">
-        🎁 Sorteo de Intercambio de Regalos
-      </Typography>
-
-      <Card sx={{ mt: 4, mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Agregar Participantes ({participants.length}/13)
-          </Typography>
-          
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <TextField
-              fullWidth
-              label="Nombre del participante"
-              value={currentName}
-              onChange={(e) => setCurrentName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddParticipant()}
-              disabled={participants.length >= 13}
-            />
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={handleAddParticipant}
-              disabled={participants.length >= 13}
-            >
-              Agregar
-            </Button>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {participants.map((participant) => (
-              <Chip
-                key={participant.id}
-                label={participant.name}
-                onDelete={() => handleRemoveParticipant(participant.id)}
-                color="primary"
+    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 6 }, px: { xs: 1, sm: 0 } }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 2, md: 4 }, alignItems: { xs: 'stretch', md: 'flex-start' } }}>
+        <Box sx={{ flex: 1 }}>
+          <Card sx={{ mt: { xs: 2, md: 4 }, mb: 3, bgcolor: '#fff', boxShadow: 2, borderRadius: 2, minWidth: { xs: '100%', md: 500 } }}>
+            <CardContent>
+              <Typography variant="h4" gutterBottom align="center" color="primary" sx={{ fontSize: { xs: '1.5rem', sm: '2.2rem', md: '2.8rem' } }}>
+                🎁 {texts.appTitle}
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: { xs: 2, sm: 3 } }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={participants.length === defaultParticipants.length && restrictions.length === defaultRestrictions.length}
+                      onChange={(_, checked) => {
+                        if (checked) {
+                          setParticipants(defaultParticipants);
+                          setRestrictions(defaultRestrictions);
+                          setListName('Intercambio de Regalos de Navidad');
+                        } else {
+                          setParticipants([]);
+                          setRestrictions([]);
+                          setListName('');
+                        }
+                      }}
+                      color="primary"
+                      sx={{
+                        '& .MuiSwitch-thumb': { bgcolor: '#0d1a3a' },
+                        '& .MuiSwitch-track': { bgcolor: '#185adb' },
+                      }}
+                    />
+                  }
+                  label={<Typography sx={{ fontWeight: 'bold', color: '#0d1a3a', fontSize: { xs: '1rem', sm: '1.1rem' } }}>Cargar lista por defecto</Typography>}
+                  sx={{ mx: 'auto' }}
+                />
+              </Box>
+              <TextField
+                fullWidth
+                label={texts.admin.listLabel}
+                value={listName}
+                onChange={e => setListName(e.target.value)}
+                placeholder={texts.admin.listPlaceholder}
                 variant="outlined"
+                InputLabelProps={{
+                  style: {
+                    color: '#0d1a3a', fontWeight: 600, fontSize: '1.1rem', background: '#fff', padding: '0 4px', borderRadius: 4, marginLeft: 8
+                  }
+                }}
+                inputProps={{
+                  style: {
+                    fontSize: '1.1rem', padding: '14px 16px', color: '#0d1a3a', fontWeight: 500
+                  }
+                }}
+                sx={{
+                  mb: { xs: 2, sm: 3 },
+                  bgcolor: '#fff',
+                  borderRadius: 1,
+                  boxShadow: '0 2px 8px rgba(24,90,219,0.08)',
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: '#fff',
+                    borderRadius: 1,
+                    border: '1.5px solid #0d1a3a',
+                    boxShadow: '0 2px 8px rgba(24,90,219,0.08)',
+                    '&:hover': {
+                      borderColor: '#14305c',
+                    },
+                    '&.Mui-focused': {
+                      borderColor: '#14305c',
+                      boxShadow: '0 0 0 2px rgba(20,48,92,0.15)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: '#0d1a3a',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none',
+                  },
+                }}
               />
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
-
-      {participants.length > 0 && (
-        <Card sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label={texts.admin.participantLabel}
+                  value={currentName}
+                  onChange={(e) => setCurrentName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddParticipant()}
+                  placeholder={texts.admin.participantPlaceholder}
+                  variant="outlined"
+                  InputLabelProps={{
+                    style: {
+                      color: '#0d1a3a', fontWeight: 600, fontSize: '1.1rem', background: '#fff', padding: '0 4px', borderRadius: 4, marginLeft: 8
+                    }
+                  }}
+                  inputProps={{
+                    style: {
+                      fontSize: '1.1rem', padding: '14px 16px', color: '#0d1a3a', fontWeight: 500
+                    }
+                  }}
+                  sx={{
+                    bgcolor: '#fff',
+                    borderRadius: 1,
+                    boxShadow: '0 2px 8px rgba(24,90,219,0.08)',
+                    '& .MuiOutlinedInput-root': {
+                      bgcolor: '#fff',
+                      borderRadius: 1,
+                      border: '1.5px solid #0d1a3a',
+                      boxShadow: '0 2px 8px rgba(24,90,219,0.08)',
+                      '&:hover': {
+                        borderColor: '#14305c',
+                      },
+                      '&.Mui-focused': {
+                        borderColor: '#14305c',
+                        boxShadow: '0 0 0 2px rgba(20,48,92,0.15)',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#0d1a3a',
+                      fontWeight: 600,
+                      fontSize: '1.1rem',
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none',
+                    },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={handleAddParticipant}
+                  sx={{ bgcolor: '#0d1a3a', color: '#fff', fontWeight: 'bold', borderRadius: 1, px: { xs: 2, sm: 4 }, py: { xs: 1, sm: 1.5 }, fontSize: { xs: '0.95rem', sm: '1rem' }, boxShadow: 2, '&:hover': { bgcolor: '#14305c' } }}
+                >
+                  {texts.admin.add}
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, bgcolor: '#fff', p: { xs: 1, sm: 2 }, borderRadius: 2 }}>
+                {participants.map((participant) => (
+                  <Chip
+                    key={participant.id}
+                    label={participant.name}
+                    onDelete={() => handleRemoveParticipant(participant.id)}
+                    color="primary"
+                    variant="outlined"
+                    sx={{ bgcolor: '#f5f6fa', color: '#0d1a3a', fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1rem' }, mb: 1, border: 'none', boxShadow: 1 }}
+                  />
+                ))}
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Casino />}
+                  onClick={handlePerformDraw}
+                  disabled={participants.length < 2 || drawCompleted}
+                  sx={{ px: 6, py: 2, bgcolor: '#0d1a3a', color: '#fff', fontWeight: 'bold', borderRadius: 2, '&:hover': { bgcolor: '#1976d2' } }}
+                >
+                  Realizar Sorteo
+                </Button>
+              </Box>
+              {drawCompleted && (
+                <Alert severity="success" sx={{ mt: 3 }}>
+                  ¡Sorteo completado! Ahora puedes generar los enlaces para cada participante.
+                  Ve a la sección de "Ver Enlaces" para compartir los resultados.
+                </Alert>
+              )}
+              <Snackbar
+                open={!!error}
+                autoHideDuration={6000}
+                onClose={() => setError('')}
+              >
+                <Alert severity="error" onClose={() => setError('')}>
+                  {error}
+                </Alert>
+              </Snackbar>
+              <Snackbar
+                open={success}
+                autoHideDuration={6000}
+                onClose={() => setSuccess(false)}
+              >
+                <Alert severity="success" onClose={() => setSuccess(false)}>
+                  ¡Sorteo realizado exitosamente!
+                </Alert>
+              </Snackbar>
+            </CardContent>
+          </Card>
+        </Box>
+        <Card sx={{ minWidth: 400, maxWidth: 600, bgcolor: '#fff', boxShadow: 2, borderRadius: 2 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom color="secondary.main" fontWeight="bold">
               Restricciones (Opcional)
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Define quién NO puede regalar a quién
+              Define quién <b>NO</b> puede regalar a quién
             </Typography>
-
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <FormControl fullWidth>
                 <InputLabel>¿Quién no puede regalar?</InputLabel>
@@ -228,7 +384,6 @@ const AdminPanel = () => {
                   ))}
                 </Select>
               </FormControl>
-
               {selectedParticipant && (
                 <FormControl fullWidth>
                   <InputLabel>¿A quién NO puede regalar?</InputLabel>
@@ -249,19 +404,18 @@ const AdminPanel = () => {
                   </Select>
                 </FormControl>
               )}
-
               <Button
                 variant="outlined"
                 onClick={handleAddRestriction}
                 disabled={!selectedParticipant || selectedRestrictions.length === 0}
+                sx={{ bgcolor: '#0d1a3a', color: '#fff', fontWeight: 'bold', borderRadius: 2, '&:hover': { bgcolor: '#1976d2' } }}
               >
                 Agregar Restricción
               </Button>
             </Box>
-
             {restrictions.length > 0 && (
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
+              <Box sx={{ mt: 3, bgcolor: '#fff', borderRadius: 2, p: 2, boxShadow: 2 }}>
+                <Typography variant="subtitle2" gutterBottom color="secondary.main" fontWeight="bold">
                   Restricciones Actuales:
                 </Typography>
                 {restrictions.map((restriction) => (
@@ -273,11 +427,12 @@ const AdminPanel = () => {
                       justifyContent: 'space-between',
                       p: 1,
                       mb: 1,
-                      bgcolor: 'background.default',
-                      borderRadius: 1
+                      bgcolor: 'grey.100',
+                      borderRadius: 2,
+                      boxShadow: 1
                     }}
                   >
-                    <Typography variant="body2">
+                    <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 'bold' }}>
                       <strong>{getParticipantName(restriction.participantId)}</strong>
                       {' '}no puede regalar a:{' '}
                       {restriction.cannotGiveTo.map(id => getParticipantName(id)).join(', ')}
@@ -285,6 +440,7 @@ const AdminPanel = () => {
                     <IconButton
                       size="small"
                       onClick={() => handleRemoveRestriction(restriction.participantId)}
+                      sx={{ color: 'error.main' }}
                     >
                       <Delete fontSize="small" />
                     </IconButton>
@@ -294,47 +450,33 @@ const AdminPanel = () => {
             )}
           </CardContent>
         </Card>
-      )}
-
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<Casino />}
-          onClick={handlePerformDraw}
-          disabled={participants.length !== 13 || drawCompleted}
-          sx={{ px: 6, py: 2 }}
-        >
-          Realizar Sorteo
-        </Button>
       </Box>
-
-      {drawCompleted && (
-        <Alert severity="success" sx={{ mt: 3 }}>
-          ¡Sorteo completado! Ahora puedes generar los enlaces para cada participante.
-          Ve a la sección de "Ver Enlaces" para compartir los resultados.
-        </Alert>
+      {/* Selector de sorteos guardados */}
+      {draws.length > 0 && (
+        <Card sx={{ mb: 3, bgcolor: 'background.paper', boxShadow: 2 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom color="primary">
+              Sorteos guardados
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {draws.map(draw => (
+                <Button
+                  key={draw.id}
+                  variant={draw.id === activeDrawId ? 'contained' : 'outlined'}
+                  color={draw.id === activeDrawId ? 'primary' : 'inherit'}
+                  onClick={() => handleSelectDraw(draw.id)}
+                  sx={{ textAlign: 'left', justifyContent: 'flex-start' }}
+                >
+                  {draw.id} - {draw.createdAt.toLocaleString()}
+                </Button>
+              ))}
+            </Box>
+            <Button variant="text" color="error" onClick={handleClearAllDraws} sx={{ mt: 2 }}>
+              Borrar todos los sorteos
+            </Button>
+          </CardContent>
+        </Card>
       )}
-
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError('')}
-      >
-        <Alert severity="error" onClose={() => setError('')}>
-          {error}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={success}
-        autoHideDuration={6000}
-        onClose={() => setSuccess(false)}
-      >
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-          ¡Sorteo realizado exitosamente!
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };
