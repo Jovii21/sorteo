@@ -14,8 +14,7 @@ import {
   Tooltip
 } from '@mui/material';
 import { ContentCopy, Link as LinkIcon } from '@mui/icons-material';
-import { getDrawResult, getDrawList, clearDraw } from '../utils/storage';
-import type { Assignment } from '../types';
+import { getDrawList, clearDraw } from '../utils/storage';
 
 const LinksView = () => {
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
