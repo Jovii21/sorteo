@@ -24,4 +24,5 @@ export interface DrawResult {
   id: string;
   assignments: Assignment[];
   createdAt: Date;
+  name?: string;
 }

@@ -134,7 +134,7 @@ const AdminPanel = () => {
 
     try {
       const assignments = performDraw(participants, restrictions);
-      
+
       if (!assignments) {
         setError(
           'No se pudo realizar el sorteo con las restricciones actuales. Intenta modificar las restricciones.'
@@ -142,7 +142,7 @@ const AdminPanel = () => {
         return;
       }
 
-      saveDrawResult(assignments);
+      saveDrawResult(assignments, listName);
       setSuccess(true);
       setDrawCompleted(true);
     } catch (err) {
@@ -467,7 +467,7 @@ const AdminPanel = () => {
                   onClick={() => handleSelectDraw(draw.id)}
                   sx={{ textAlign: 'left', justifyContent: 'flex-start' }}
                 >
-                  {draw.id} - {draw.createdAt.toLocaleString()}
+                  {draw.name ? draw.name : 'Sorteo'} - {draw.createdAt.toLocaleString()}
                 </Button>
               ))}
             </Box>

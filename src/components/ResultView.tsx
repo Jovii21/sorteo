@@ -28,10 +28,9 @@ const ResultView = () => {
       }
 
       // Verificar si el token ya fue accedido
-      if (isTokenAccessed(token)) {
-        setAlreadyAccessed(true);
-        return;
-      }
+      const accessed = isTokenAccessed(token);
+      setAlreadyAccessed(accessed);
+      if (accessed) return;
 
       // Obtener la asignación
       const result = getAssignmentByToken(token);
