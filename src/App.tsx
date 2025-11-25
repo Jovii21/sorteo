@@ -89,7 +89,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ bgcolor: '#fff', minHeight: '100vh' }}>
+        <Box sx={{ bgcolor: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <AppBar position="static" elevation={0} sx={{ bgcolor: '#0d1a3a', color: '#fff', borderRadius: 0, boxShadow: 2 }}>
             <Toolbar sx={{ minHeight: { xs: 56, sm: 80 }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, px: { xs: 2, sm: 4 }, py: { xs: 1, sm: 0 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', justifyContent: { xs: 'center', sm: 'flex-start' }, mb: { xs: 1, sm: 0 } }}>
@@ -120,14 +120,14 @@ function App() {
               </Box>
             </Toolbar>
           </AppBar>
-          <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 0 } }}>
+          <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 0 }, flex: 1 }}>
             <Routes>
               <Route path="/" element={<AdminPanel />} />
               <Route path="/links" element={<LinksView />} />
               <Route path="/result/:token" element={<ResultView />} />
             </Routes>
           </Container>
-          <Box component="footer" sx={{ bgcolor: '#0d1a3a', color: '#fff', py: { xs: 1, sm: 2 }, textAlign: 'center', mt: 6, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+          <Box component="footer" sx={{ bgcolor: '#0d1a3a', color: '#fff', py: { xs: 1, sm: 2 }, textAlign: 'center', fontSize: { xs: '0.9rem', sm: '1rem' }, mt: 'auto' }}>
             <Typography variant="body2">© {new Date().getFullYear()} Jovi</Typography>
           </Box>
         </Box>

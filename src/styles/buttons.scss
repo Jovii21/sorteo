@@ -1,0 +1,47 @@
+.btn-primary {
+  background-color: $color-primary;
+  color: $color-text;
+  border-radius: 8px;
+  font-weight: bold;
+  padding: 10px 32px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(24,90,219,0.08);
+  border: none;
+  transition: background 0.2s;
+  &:hover {
+    background-color: $color-input-hover;
+    color: $color-text;
+  }
+}
+
+.btn-secondary {
+  background-color: $color-secondary;
+  color: $color-text;
+  border-radius: 8px;
+  font-weight: bold;
+  padding: 10px 32px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(24,90,219,0.08);
+  border: none;
+  transition: background 0.2s;
+  &:hover {
+    background-color: $color-primary;
+    color: $color-text;
+  }
+}
+
+.btn-error {
+  background-color: #d32f2f;
+  color: $color-text;
+  border-radius: 8px;
+  font-weight: bold;
+  padding: 10px 32px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(24,90,219,0.08);
+  border: none;
+  transition: background 0.2s;
+  &:hover {
+    background-color: darken(#d32f2f, 10%);
+    color: $color-text;
+  }
+}

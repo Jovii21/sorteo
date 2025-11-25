@@ -35,13 +35,13 @@ const ResultView = () => {
 
       // Obtener la asignación
       const result = getAssignmentByToken(token);
-      
+
       if (!result) {
         setError('No se encontró información para este enlace');
         return;
       }
 
-      // Marcar como accedido
+      // Marcar como accedido y guardar el estado local
       markAsAccessed(token);
       setAssignment(result);
     };
@@ -68,7 +68,8 @@ const ResultView = () => {
     return (
       <Container maxWidth="sm" sx={{ py: 8 }}>
         <Alert severity="info">
-          Este enlace ya ha sido accedido. No se puede volver a abrir.
+          Este enlace ya ha sido accedido. No se puede volver a abrir.<br />
+          Si necesitas ver tu asignación, contacta al administrador.
         </Alert>
         <Button
           variant="contained"

@@ -1,0 +1,43 @@
+.bg-main {
+  background-color: $color-bg;
+}
+
+.text-primary {
+  color: $color-primary;
+}
+
+.text-secondary {
+  color: $color-secondary;
+}
+
+.text-white {
+  color: $color-text;
+}
+
+.navbar {
+  background-color: $color-navbar;
+  color: $color-text;
+}
+
+.footer {
+  background-color: $color-footer;
+  color: $color-text;
+}
+
+.card {
+  background-color: $color-bg;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(24,90,219,0.08);
+}
+
+.input {
+  background-color: $color-input-bg;
+  color: $color-text;
+  border: 1.5px solid $color-input-border;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  &:hover {
+    border-color: $color-input-hover;
+  }
+}
