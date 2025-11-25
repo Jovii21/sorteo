@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -61,6 +62,7 @@ const AdminPanel = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [drawCompleted, setDrawCompleted] = useState(false);
+  const navigate = useNavigate();
   const [draws, setDraws] = useState<DrawResult[]>(getDrawList());
   const [activeDrawId, setActiveDrawIdState] = useState<string | null>(getActiveDrawId());
   const [listName, setListName] = useState('');
@@ -145,6 +147,11 @@ const AdminPanel = () => {
       saveDrawResult(assignments, listName);
       setSuccess(true);
       setDrawCompleted(true);
+      // Limpiar campos y redirigir
+      setParticipants([]);
+      setRestrictions([]);
+      setListName('');
+      setTimeout(() => navigate('/links'), 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al realizar el sorteo');
     }

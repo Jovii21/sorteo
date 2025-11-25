@@ -70,16 +70,18 @@ const LinksView = () => {
         <Typography variant="h6" className="text-primary" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
           Sorteos guardados
         </Typography>
-        <List>
-          {draws.map(draw => (
-            <ListItem key={draw.id}>
-              <ListItemText
-                primary={draw.name ? draw.name : 'Sorteo'}
-                secondary={draw.createdAt ? new Date(draw.createdAt).toLocaleString() : ''}
-              />
-            </ListItem>
-          ))}
-        </List>
+        <Card sx={{ bgcolor: '#f5f6fa', borderRadius: 2, boxShadow: 1, p: 2, mt: 1 }}>
+          <List>
+            {draws.map(draw => (
+              <ListItem key={draw.id} sx={{ borderBottom: '1px solid #e0e0e0', '&:last-child': { borderBottom: 'none' } }}>
+                <ListItemText
+                  primary={<span style={{ color: '#0d1a3a', fontWeight: 600 }}>{draw.name ? draw.name : 'Sorteo'}</span>}
+                  secondary={<span style={{ color: '#185adb' }}>{draw.createdAt ? new Date(draw.createdAt).toLocaleString() : ''}</span>}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Card>
       </Box>
 
       {!loaded ? (
