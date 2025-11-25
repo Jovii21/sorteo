@@ -1,4 +1,4 @@
-import type { Participant, Restriction, Assignment } from '../types';
+import type { Participant, Restriction, Assignment } from "../types";
 
 /**
  * Genera un token único para cada participante
@@ -14,21 +14,21 @@ export const validateDrawConfig = (
   participants: Participant[],
   restrictions: Restriction[]
 ): { valid: boolean; error?: string } => {
-  if (participants.length !== 13) {
+  if (participants.length < 3) {
     return {
       valid: false,
-      error: 'Debes ingresar exactamente 13 participantes'
+      error: "Debes ingresar al menos 3 participantes",
     };
   }
 
-  const participantIds = new Set(participants.map(p => p.id));
-  
+  const participantIds = new Set(participants.map((p) => p.id));
+
   // Validar que las restricciones sean válidas
   for (const restriction of restrictions) {
     if (!participantIds.has(restriction.participantId)) {
       return {
         valid: false,
-        error: 'Una restricción hace referencia a un participante inexistente'
+        error: "Una restricción hace referencia a un participante inexistente",
       };
     }
 
@@ -36,7 +36,8 @@ export const validateDrawConfig = (
       if (!participantIds.has(restrictedId)) {
         return {
           valid: false,
-          error: 'Una restricción hace referencia a un participante inexistente'
+          error:
+            "Una restricción hace referencia a un participante inexistente",
         };
       }
     }
@@ -55,7 +56,9 @@ const isValidAssignment = (
 ): boolean => {
   if (giverId === receiverId) return false;
 
-  const giverRestriction = restrictions.find(r => r.participantId === giverId);
+  const giverRestriction = restrictions.find(
+    (r) => r.participantId === giverId
+  );
   if (giverRestriction && giverRestriction.cannotGiveTo.includes(receiverId)) {
     return false;
   }
@@ -86,7 +89,15 @@ const findValidAssignment = (
       assignments.set(giver.id, receiverId);
       availableReceivers.delete(receiverId);
 
-      if (findValidAssignment(participants, restrictions, assignments, availableReceivers, currentIndex + 1)) {
+      if (
+        findValidAssignment(
+          participants,
+          restrictions,
+          assignments,
+          availableReceivers,
+          currentIndex + 1
+        )
+      ) {
         return true;
       }
 
@@ -112,9 +123,11 @@ export const performDraw = (
   }
 
   // Mezclar participantes para añadir aleatoriedad
-  const shuffledParticipants = [...participants].sort(() => Math.random() - 0.5);
+  const shuffledParticipants = [...participants].sort(
+    () => Math.random() - 0.5
+  );
   const assignments = new Map<string, string>();
-  const availableReceivers = new Set(participants.map(p => p.id));
+  const availableReceivers = new Set(participants.map((p) => p.id));
 
   // Intentar encontrar una asignación válida
   const success = findValidAssignment(
@@ -132,15 +145,15 @@ export const performDraw = (
   // Convertir el mapa a la estructura de Assignment
   const result: Assignment[] = [];
   assignments.forEach((receiverId, giverId) => {
-    const giver = participants.find(p => p.id === giverId);
-    const receiver = participants.find(p => p.id === receiverId);
+    const giver = participants.find((p) => p.id === giverId);
+    const receiver = participants.find((p) => p.id === receiverId);
 
     if (giver && receiver) {
       result.push({
         giver: giver.name,
         receiver: receiver.name,
         token: generateToken(),
-        accessed: false
+        accessed: false,
       });
     }
   });

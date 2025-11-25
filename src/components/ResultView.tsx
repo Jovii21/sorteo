@@ -9,7 +9,7 @@ import {
   Alert,
   Button
 } from '@mui/material';
-import { CardGiftcard } from '@mui/icons-material';
+import { texts } from '../constants/texts';
 import { getAssignmentByToken, markAsAccessed, isTokenAccessed } from '../utils/storage';
 import type { Assignment } from '../types';
 
@@ -91,49 +91,33 @@ const ResultView = () => {
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Card
-        sx={{
-          textAlign: 'center',
-          py: 4,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white'
-        }}
-      >
+      <Card sx={{ bgcolor: '#fff', borderRadius: 2, boxShadow: 2, minWidth: 500, maxWidth: 700, mx: 'auto', mt: 6, p: 3 }}>
         <CardContent>
-          <CardGiftcard sx={{ fontSize: 80, mb: 2 }} />
-          
-          <Typography variant="h4" gutterBottom fontWeight="bold">
-            ¡Hola, {assignment.giver}!
+          <Typography variant="h4" align="center" color="primary" gutterBottom fontWeight="bold">
+            {texts.result.title}
           </Typography>
-          
-          <Typography variant="h6" sx={{ my: 3 }}>
-            En este intercambio de regalos, le darás tu regalo a:
-          </Typography>
-          
-          <Box
-            sx={{
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: 2,
-              p: 3,
-              my: 3
-            }}
-          >
-            <Typography variant="h3" fontWeight="bold">
-              {assignment.receiver}
-            </Typography>
-          </Box>
-          
-          <Typography variant="body1" sx={{ mt: 3, opacity: 0.9 }}>
-            🎄 ¡Prepara un regalo especial! 🎄
-          </Typography>
-          
-          <Alert severity="warning" sx={{ mt: 4, textAlign: 'left' }}>
-            <Typography variant="body2">
-              ⚠️ Importante: Este enlace solo se puede abrir una vez por seguridad.
-              Asegúrate de recordar el nombre de tu intercambio.
-            </Typography>
-          </Alert>
+          {alreadyAccessed ? (
+            <Alert severity="info" sx={{ mt: 3, mb: 2 }}>
+              {texts.result.alreadyOpened}
+            </Alert>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, mt: 4 }}>
+              <Typography variant="h5" color="secondary" fontWeight="bold">
+                {texts.result.hello}<span style={{ color: '#1976d2' }}>{assignment.giver}</span>!
+              </Typography>
+              <Typography variant="h6" color="primary" fontWeight="bold">
+                {texts.result.assigned}
+              </Typography>
+              <Box sx={{ bgcolor: 'grey.100', borderRadius: 2, px: 4, py: 2, boxShadow: 1, minWidth: 300 }}>
+                <Typography variant="h4" color="primary.dark" fontWeight="bold" align="center">
+                  {assignment.receiver}
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+                {texts.result.secret}
+              </Typography>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </Container>

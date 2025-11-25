@@ -1,36 +1,52 @@
-import type { DrawResult, Assignment } from '../types';
+import type { DrawResult, Assignment } from "../types";
 
-const STORAGE_KEY = 'gift_exchange_draw';
+const STORAGE_LIST_KEY = "gift_exchange_draws";
+const STORAGE_ACTIVE_KEY = "gift_exchange_draw_active";
 
 /**
  * Guarda el resultado del sorteo en localStorage
  */
 export const saveDrawResult = (assignments: Assignment[]): string => {
-  // Limpiar sorteo anterior
-  localStorage.removeItem(STORAGE_KEY);
   const drawResult: DrawResult = {
     id: `draw-${Date.now()}`,
     assignments,
-    createdAt: new Date()
+    createdAt: new Date(),
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(drawResult));
+  // Obtener lista actual
+  const draws = getDrawList();
+  draws.push(drawResult);
+  localStorage.setItem(STORAGE_LIST_KEY, JSON.stringify(draws));
+  localStorage.setItem(STORAGE_ACTIVE_KEY, drawResult.id);
   return drawResult.id;
+};
+
+export const getDrawList = (): DrawResult[] => {
+  const stored = localStorage.getItem(STORAGE_LIST_KEY);
+  if (!stored) return [];
+  try {
+    const list = JSON.parse(stored);
+    return list.map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }));
+  } catch {
+    return [];
+  }
+};
+
+export const getActiveDrawId = (): string | null => {
+  return localStorage.getItem(STORAGE_ACTIVE_KEY);
+};
+
+export const setActiveDrawId = (id: string) => {
+  localStorage.setItem(STORAGE_ACTIVE_KEY, id);
 };
 
 /**
  * Obtiene el resultado del sorteo desde localStorage
  */
 export const getDrawResult = (): DrawResult | null => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return null;
-
-  try {
-    const result = JSON.parse(stored);
-    result.createdAt = new Date(result.createdAt);
-    return result;
-  } catch {
-    return null;
-  }
+  const draws = getDrawList();
+  const activeId = getActiveDrawId();
+  if (!activeId) return null;
+  return draws.find((d) => d.id === activeId) || null;
 };
 
 /**
@@ -40,11 +56,11 @@ export const markAsAccessed = (token: string): boolean => {
   const drawResult = getDrawResult();
   if (!drawResult) return false;
 
-  const assignment = drawResult.assignments.find(a => a.token === token);
+  const assignment = drawResult.assignments.find((a) => a.token === token);
   if (!assignment) return false;
 
   assignment.accessed = true;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(drawResult));
+  localStorage.setItem(STORAGE_LIST_KEY, JSON.stringify(getDrawList()));
   return true;
 };
 
@@ -55,7 +71,7 @@ export const isTokenAccessed = (token: string): boolean => {
   const drawResult = getDrawResult();
   if (!drawResult) return false;
 
-  const assignment = drawResult.assignments.find(a => a.token === token);
+  const assignment = drawResult.assignments.find((a) => a.token === token);
   return assignment?.accessed || false;
 };
 
@@ -66,12 +82,15 @@ export const getAssignmentByToken = (token: string): Assignment | null => {
   const drawResult = getDrawResult();
   if (!drawResult) return null;
 
-  return drawResult.assignments.find(a => a.token === token) || null;
+  return drawResult.assignments.find((a) => a.token === token) || null;
 };
 
 /**
  * Limpia el sorteo actual
  */
-export const clearDraw = (): void => {
-  localStorage.removeItem(STORAGE_KEY);
+export const clearDraws = (): void => {
+  localStorage.removeItem(STORAGE_LIST_KEY);
+  localStorage.removeItem(STORAGE_ACTIVE_KEY);
 };
+
+export const clearDraw = clearDraws;
