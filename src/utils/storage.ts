@@ -6,7 +6,10 @@ const STORAGE_ACTIVE_KEY = "gift_exchange_draw_active";
 /**
  * Guarda el resultado del sorteo en localStorage
  */
-export const saveDrawResult = (assignments: Assignment[], name?: string): string => {
+export const saveDrawResult = (
+  assignments: Assignment[],
+  name?: string
+): string => {
   const drawResult: DrawResult = {
     id: `draw-${Date.now()}`,
     assignments,
@@ -59,7 +62,9 @@ export const markAsAccessed = (token: string): boolean => {
   if (!activeId) return false;
   const drawIndex = draws.findIndex((d) => d.id === activeId);
   if (drawIndex === -1) return false;
-  const assignment = draws[drawIndex].assignments.find((a) => a.token === token);
+  const assignment = draws[drawIndex].assignments.find(
+    (a) => a.token === token
+  );
   if (!assignment) return false;
   assignment.accessed = true;
   localStorage.setItem(STORAGE_LIST_KEY, JSON.stringify(draws));
