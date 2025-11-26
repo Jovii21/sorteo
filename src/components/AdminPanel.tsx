@@ -73,10 +73,7 @@ const AdminPanel = () => {
       return;
     }
 
-    if (participants.length >= 13) {
-      setError('Ya tienes 13 participantes');
-      return;
-    }
+    // Sin límite de participantes
 
     const newParticipant: Participant = {
       id: `p-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -129,21 +126,16 @@ const AdminPanel = () => {
   };
 
   const handlePerformDraw = () => {
-    if (participants.length !== 13) {
-      setError('Debes tener exactamente 13 participantes');
+    if (participants.length < 2) {
+      setError('Debes tener al menos 2 participantes');
       return;
     }
-
     try {
       const assignments = performDraw(participants, restrictions);
-
       if (!assignments) {
-        setError(
-          'No se pudo realizar el sorteo con las restricciones actuales. Intenta modificar las restricciones.'
-        );
+        setError('No se pudo realizar el sorteo con las restricciones actuales. Intenta modificar las restricciones.');
         return;
       }
-
       saveDrawResult(assignments, listName);
       setSuccess(true);
       setDrawCompleted(true);
