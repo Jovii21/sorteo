@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import {
   Box,
   Button,
@@ -18,18 +19,25 @@ import { getDrawList, clearDraw } from "../utils/storage";
 
 const LinksView = () => {
   // Simula la carga de assignments desde draws
+  const [selectedDrawId, setSelectedDrawId] = useState<string>("");
+
   const handleLoadLinks = () => {
-    // Junta todos los assignments de todos los sorteos
-    const allAssignments = draws.flatMap((draw) =>
-      draw.assignments.map((a: any) => ({
-        ...a,
-        drawName: draw.name || "Sorteo",
-        drawId: draw.id,
-        createdAt: draw.createdAt,
-      }))
-    );
-    setAssignments(allAssignments);
+    if (draws.length > 0) {
+      const defaultId = draws[0].id;
+      setSelectedDrawId(defaultId);
+      setAssignments(draws[0].assignments.map((a: any) => ({ ...a })));
+    } else {
+      setSelectedDrawId("");
+      setAssignments([]);
+    }
     setLoaded(true);
+  };
+
+  const handleSelectDraw = (event: any) => {
+    const drawId = event.target.value;
+    setSelectedDrawId(drawId);
+    const draw = draws.find((d: any) => d.id === drawId);
+    setAssignments(draw ? draw.assignments.map((a: any) => ({ ...a })) : []);
   };
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [draws, setDraws] = useState(getDrawList());
@@ -96,32 +104,26 @@ const LinksView = () => {
             mt: 1,
           }}
         >
-          <List>
-            {draws.map((draw) => (
-              <ListItem
-                key={draw.id}
-                sx={{
-                  borderBottom: "1px solid #e0e0e0",
-                  "&:last-child": { borderBottom: "none" },
-                }}
-              >
-                <ListItemText
-                  primary={
-                    <span style={{ color: "#0d1a3a", fontWeight: 600 }}>
-                      {draw.name ? draw.name : "Sorteo"}
-                    </span>
-                  }
-                  secondary={
-                    <span style={{ color: "#185adb" }}>
-                      {draw.createdAt
-                        ? new Date(draw.createdAt).toLocaleString()
-                        : ""}
-                    </span>
-                  }
-                />
-              </ListItem>
-            ))}
-          </List>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel id="select-draw-label">Selecciona un sorteo</InputLabel>
+            <Select
+              labelId="select-draw-label"
+              value={selectedDrawId}
+              label="Selecciona un sorteo"
+              onChange={handleSelectDraw}
+              disabled={draws.length === 0}
+            >
+              {draws.map((draw: any) => (
+                <MenuItem key={draw.id} value={draw.id}>
+                  {draw.name ? draw.name : "Sorteo"} (
+                  {draw.createdAt
+                    ? new Date(draw.createdAt).toLocaleString()
+                    : ""}
+                  )
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Card>
       </Box>
 

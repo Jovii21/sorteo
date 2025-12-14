@@ -1,11 +1,1 @@
-[
-  {
-    "id": "draw-1",
-    "name": "Sorteo de ejemplo",
-    "createdAt": "2025-12-14T00:00:00.000Z",
-    "assignments": [
-      { "token": "123", "giver": "Ana", "accessed": false },
-      { "token": "456", "giver": "Luis", "accessed": false }
-    ]
-  }
-]
+[]
