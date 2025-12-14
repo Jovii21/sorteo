@@ -23,9 +23,9 @@ const LinksView = () => {
     const allAssignments = draws.flatMap((draw) =>
       draw.assignments.map((a: any) => ({
         ...a,
-        drawName: draw.name || 'Sorteo',
+        drawName: draw.name || "Sorteo",
         drawId: draw.id,
-        createdAt: draw.createdAt
+        createdAt: draw.createdAt,
       }))
     );
     setAssignments(allAssignments);
@@ -186,16 +186,17 @@ const LinksView = () => {
                           <Typography variant="h6" component="span">
                             {assignment.giver}
                           </Typography>
-                          <Typography variant="body2" component="span" sx={{ ml: 2, color: '#888' }}>
+                          <Typography
+                            variant="body2"
+                            component="span"
+                            sx={{ ml: 2, color: "#888" }}
+                          >
                             {assignment.drawName}
                           </Typography>
                         </>
                       }
                       secondary={
-                        <Box
-                          component="span"
-                          sx={{ display: "block", mt: 1 }}
-                        >
+                        <Box component="span" sx={{ display: "block", mt: 1 }}>
                           <Typography
                             variant="body2"
                             component="span"
