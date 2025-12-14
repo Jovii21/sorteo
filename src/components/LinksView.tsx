@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ContentCopy, Link as LinkIcon } from "@mui/icons-material";
-import { getDrawList, clearDraw } from "../utils/storage";
+// import { getDrawList, clearDraw } from "../utils/storage";
 
 const LinksView = () => {
   // Simula la carga de assignments desde draws
@@ -40,17 +40,24 @@ const LinksView = () => {
     setAssignments(draw ? draw.assignments.map((a: any) => ({ ...a })) : []);
   };
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
-  const [draws, setDraws] = useState(getDrawList());
+  const [draws, setDraws] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<
     Array<{ token: string; giver: string; accessed?: boolean }>
   >([]);
   const [loaded, setLoaded] = useState(false);
 
+  // URL de tu backend (ajusta si es necesario)
+  const API_URL = "https://msa-sorteo.netlify.app/.netlify/functions/sorteo";
+
+  // Obtener sorteos al cargar
+  const fetchDraws = async () => {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    setDraws(data);
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDraws(getDrawList());
-    }, 2000);
-    return () => clearInterval(interval);
+    fetchDraws();
   }, []);
 
   const generateLink = (token: string): string => {
@@ -68,11 +75,13 @@ const LinksView = () => {
     }
   };
 
-  const handleClearDraw = () => {
-    clearDraw();
+  // Eliminar sorteo seleccionado (requiere endpoint DELETE)
+  const handleClearDraw = async () => {
+    if (!selectedDrawId) return;
+    await fetch(`${API_URL}/${selectedDrawId}`, { method: "DELETE" });
     setAssignments([]);
     setLoaded(false);
-    setDraws([]);
+    await fetchDraws();
   };
 
   return (
