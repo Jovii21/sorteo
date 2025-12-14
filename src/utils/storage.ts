@@ -1,4 +1,5 @@
 import type { DrawResult, Assignment } from "../types";
+import drawsJson from '../data/draws.json';
 
 const STORAGE_LIST_KEY = "gift_exchange_draws";
 const STORAGE_ACTIVE_KEY = "gift_exchange_draw_active";
@@ -26,13 +27,27 @@ export const saveDrawResult = (
 
 export const getDrawList = (): DrawResult[] => {
   const stored = localStorage.getItem(STORAGE_LIST_KEY);
-  if (!stored) return [];
-  try {
-    const list = JSON.parse(stored);
-    return list.map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }));
-  } catch {
-    return [];
+  if (stored) {
+    try {
+      const list = JSON.parse(stored);
+      return list.map((d: any) => ({ ...d, createdAt: new Date(d.createdAt) }));
+    } catch {
+      return [];
+    }
+  } else {
+    // Si no hay nada en localStorage, usar draws.json y guardarlo en localStorage
+    try {
+      const list = (drawsJson as any[]).map((d) => ({ ...d, createdAt: new Date(d.createdAt) }));
+      localStorage.setItem(STORAGE_LIST_KEY, JSON.stringify(drawsJson));
+      if (list.length > 0) {
+        localStorage.setItem(STORAGE_ACTIVE_KEY, list[0].id);
+      }
+      return list;
+    } catch {
+      return [];
+    }
   }
+};
 };
 
 export const getActiveDrawId = (): string | null => {
