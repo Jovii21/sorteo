@@ -19,11 +19,16 @@ import { getDrawList, clearDraw } from "../utils/storage";
 const LinksView = () => {
   // Simula la carga de assignments desde draws
   const handleLoadLinks = () => {
-    if (draws.length > 0 && draws[0].assignments) {
-      setAssignments(draws[0].assignments);
-    } else {
-      setAssignments([]);
-    }
+    // Junta todos los assignments de todos los sorteos
+    const allAssignments = draws.flatMap((draw) =>
+      draw.assignments.map((a: any) => ({
+        ...a,
+        drawName: draw.name || 'Sorteo',
+        drawId: draw.id,
+        createdAt: draw.createdAt
+      }))
+    );
+    setAssignments(allAssignments);
     setLoaded(true);
   };
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -59,6 +64,7 @@ const LinksView = () => {
     clearDraw();
     setAssignments([]);
     setLoaded(false);
+    setDraws([]);
   };
 
   return (
@@ -144,84 +150,83 @@ const LinksView = () => {
           <Card>
             <CardContent>
               <List>
-                {assignments.map(
-                  (assignment: {
-                    token: string;
-                    giver: string;
-                    accessed?: boolean;
-                  }) => (
-                    <ListItem
-                      key={assignment.token}
-                      sx={{
-                        borderBottom: "1px solid",
-                        borderColor: "divider",
-                        "&:last-child": { borderBottom: "none" },
-                      }}
-                      secondaryAction={
-                        <Tooltip
-                          title={
+                {assignments.map((assignment: any) => (
+                  <ListItem
+                    key={assignment.token}
+                    sx={{
+                      borderBottom: "1px solid",
+                      borderColor: "divider",
+                      "&:last-child": { borderBottom: "none" },
+                    }}
+                    secondaryAction={
+                      <Tooltip
+                        title={
+                          copiedToken === assignment.token
+                            ? "¡Copiado!"
+                            : "Copiar enlace"
+                        }
+                      >
+                        <IconButton
+                          edge="end"
+                          onClick={() => handleCopyLink(assignment.token)}
+                          color={
                             copiedToken === assignment.token
-                              ? "¡Copiado!"
-                              : "Copiar enlace"
+                              ? "success"
+                              : "default"
                           }
                         >
-                          <IconButton
-                            edge="end"
-                            onClick={() => handleCopyLink(assignment.token)}
-                            color={
-                              copiedToken === assignment.token
-                                ? "success"
-                                : "default"
-                            }
-                          >
-                            <ContentCopy />
-                          </IconButton>
-                        </Tooltip>
-                      }
-                    >
-                      <ListItemText
-                        primary={
+                          <ContentCopy />
+                        </IconButton>
+                      </Tooltip>
+                    }
+                  >
+                    <ListItemText
+                      primary={
+                        <>
                           <Typography variant="h6" component="span">
                             {assignment.giver}
                           </Typography>
-                        }
-                        secondary={
-                          <Box
+                          <Typography variant="body2" component="span" sx={{ ml: 2, color: '#888' }}>
+                            {assignment.drawName}
+                          </Typography>
+                        </>
+                      }
+                      secondary={
+                        <Box
+                          component="span"
+                          sx={{ display: "block", mt: 1 }}
+                        >
+                          <Typography
+                            variant="body2"
                             component="span"
-                            sx={{ display: "block", mt: 1 }}
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: "0.75rem",
+                              bgcolor: "background.default",
+                              px: 1,
+                              py: 0.5,
+                              borderRadius: 1,
+                              display: "inline-block",
+                              wordBreak: "break-all",
+                            }}
                           >
+                            {generateLink(assignment.token)}
+                          </Typography>
+                          {assignment.accessed && (
                             <Typography
-                              variant="body2"
+                              variant="caption"
+                              color="error"
                               component="span"
-                              sx={{
-                                fontFamily: "monospace",
-                                fontSize: "0.75rem",
-                                bgcolor: "background.default",
-                                px: 1,
-                                py: 0.5,
-                                borderRadius: 1,
-                                display: "inline-block",
-                                wordBreak: "break-all",
-                              }}
+                              sx={{ ml: 2 }}
                             >
-                              {generateLink(assignment.token)}
+                              ✓ Ya abierto
                             </Typography>
-                            {assignment.accessed && (
-                              <Typography
-                                variant="caption"
-                                color="error"
-                                component="span"
-                                sx={{ ml: 2 }}
-                              >
-                                ✓ Ya abierto
-                              </Typography>
-                            )}
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  )
-                )}
+                          )}
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                ))}
               </List>
             </CardContent>
           </Card>
