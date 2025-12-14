@@ -17,6 +17,15 @@ import { ContentCopy, Link as LinkIcon } from "@mui/icons-material";
 import { getDrawList, clearDraw } from "../utils/storage";
 
 const LinksView = () => {
+  // Simula la carga de assignments desde draws
+  const handleLoadLinks = () => {
+    if (draws.length > 0 && draws[0].assignments) {
+      setAssignments(draws[0].assignments);
+    } else {
+      setAssignments([]);
+    }
+    setLoaded(true);
+  };
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [draws, setDraws] = useState(getDrawList());
   const [assignments, setAssignments] = useState<
