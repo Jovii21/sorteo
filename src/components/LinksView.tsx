@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -11,14 +11,18 @@ import {
   ListItemText,
   IconButton,
   Alert,
-  Tooltip
-} from '@mui/material';
-import { ContentCopy, Link as LinkIcon } from '@mui/icons-material';
-import { getDrawList, clearDraw } from '../utils/storage';
+  Tooltip,
+} from "@mui/material";
+import { ContentCopy, Link as LinkIcon } from "@mui/icons-material";
+import { getDrawList, clearDraw } from "../utils/storage";
 
 const LinksView = () => {
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [draws, setDraws] = useState(getDrawList());
+  const [assignments, setAssignments] = useState<
+    Array<{ token: string; giver: string; accessed?: boolean }>
+  >([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,7 +42,7 @@ const LinksView = () => {
       setCopiedToken(token);
       setTimeout(() => setCopiedToken(null), 2000);
     } catch (err) {
-      console.error('Error al copiar:', err);
+      console.error("Error al copiar:", err);
     }
   };
 
@@ -50,21 +54,55 @@ const LinksView = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        align="center"
+        color="primary"
+      >
         Enlaces para Participantes
       </Typography>
 
       <Box sx={{ mt: 2, mb: 2 }}>
-        <Typography variant="h6" className="text-primary" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+        <Typography
+          variant="h6"
+          className="text-primary"
+          style={{ fontWeight: "bold", fontSize: "1.1rem" }}
+        >
           Sorteos guardados
         </Typography>
-        <Card sx={{ bgcolor: '#f5f6fa', borderRadius: 2, boxShadow: 1, p: 2, mt: 1 }}>
+        <Card
+          sx={{
+            bgcolor: "#f5f6fa",
+            borderRadius: 2,
+            boxShadow: 1,
+            p: 2,
+            mt: 1,
+          }}
+        >
           <List>
-            {draws.map(draw => (
-              <ListItem key={draw.id} sx={{ borderBottom: '1px solid #e0e0e0', '&:last-child': { borderBottom: 'none' } }}>
+            {draws.map((draw) => (
+              <ListItem
+                key={draw.id}
+                sx={{
+                  borderBottom: "1px solid #e0e0e0",
+                  "&:last-child": { borderBottom: "none" },
+                }}
+              >
                 <ListItemText
-                  primary={<span style={{ color: '#0d1a3a', fontWeight: 600 }}>{draw.name ? draw.name : 'Sorteo'}</span>}
-                  secondary={<span style={{ color: '#185adb' }}>{draw.createdAt ? new Date(draw.createdAt).toLocaleString() : ''}</span>}
+                  primary={
+                    <span style={{ color: "#0d1a3a", fontWeight: 600 }}>
+                      {draw.name ? draw.name : "Sorteo"}
+                    </span>
+                  }
+                  secondary={
+                    <span style={{ color: "#185adb" }}>
+                      {draw.createdAt
+                        ? new Date(draw.createdAt).toLocaleString()
+                        : ""}
+                    </span>
+                  }
                 />
               </ListItem>
             ))}
@@ -73,7 +111,7 @@ const LinksView = () => {
       </Box>
 
       {!loaded ? (
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Box sx={{ textAlign: "center", mt: 4 }}>
           <Button
             variant="contained"
             size="large"
@@ -90,78 +128,96 @@ const LinksView = () => {
       ) : (
         <>
           <Alert severity="info" sx={{ mt: 3, mb: 3 }}>
-            Comparte estos enlaces con cada participante. Cada enlace solo puede abrirse una vez.
+            Comparte estos enlaces con cada participante. Cada enlace solo puede
+            abrirse una vez.
           </Alert>
 
           <Card>
             <CardContent>
               <List>
-                {assignments.map((assignment) => (
-                  <ListItem
-                    key={assignment.token}
-                    sx={{
-                      borderBottom: '1px solid',
-                      borderColor: 'divider',
-                      '&:last-child': { borderBottom: 'none' }
-                    }}
-                    secondaryAction={
-                      <Tooltip
-                        title={copiedToken === assignment.token ? '¡Copiado!' : 'Copiar enlace'}
-                      >
-                        <IconButton
-                          edge="end"
-                          onClick={() => handleCopyLink(assignment.token)}
-                          color={copiedToken === assignment.token ? 'success' : 'default'}
+                {assignments.map(
+                  (assignment: {
+                    token: string;
+                    giver: string;
+                    accessed?: boolean;
+                  }) => (
+                    <ListItem
+                      key={assignment.token}
+                      sx={{
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                        "&:last-child": { borderBottom: "none" },
+                      }}
+                      secondaryAction={
+                        <Tooltip
+                          title={
+                            copiedToken === assignment.token
+                              ? "¡Copiado!"
+                              : "Copiar enlace"
+                          }
                         >
-                          <ContentCopy />
-                        </IconButton>
-                      </Tooltip>
-                    }
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="h6" component="span">
-                          {assignment.giver}
-                        </Typography>
-                      }
-                      secondary={
-                        <Box component="span" sx={{ display: 'block', mt: 1 }}>
-                          <Typography
-                            variant="body2"
-                            component="span"
-                            sx={{
-                              fontFamily: 'monospace',
-                              fontSize: '0.75rem',
-                              bgcolor: 'background.default',
-                              px: 1,
-                              py: 0.5,
-                              borderRadius: 1,
-                              display: 'inline-block',
-                              wordBreak: 'break-all'
-                            }}
+                          <IconButton
+                            edge="end"
+                            onClick={() => handleCopyLink(assignment.token)}
+                            color={
+                              copiedToken === assignment.token
+                                ? "success"
+                                : "default"
+                            }
                           >
-                            {generateLink(assignment.token)}
-                          </Typography>
-                          {assignment.accessed && (
-                            <Typography
-                              variant="caption"
-                              color="error"
-                              component="span"
-                              sx={{ ml: 2 }}
-                            >
-                              ✓ Ya abierto
-                            </Typography>
-                          )}
-                        </Box>
+                            <ContentCopy />
+                          </IconButton>
+                        </Tooltip>
                       }
-                    />
-                  </ListItem>
-                ))}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography variant="h6" component="span">
+                            {assignment.giver}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box
+                            component="span"
+                            sx={{ display: "block", mt: 1 }}
+                          >
+                            <Typography
+                              variant="body2"
+                              component="span"
+                              sx={{
+                                fontFamily: "monospace",
+                                fontSize: "0.75rem",
+                                bgcolor: "background.default",
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                display: "inline-block",
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {generateLink(assignment.token)}
+                            </Typography>
+                            {assignment.accessed && (
+                              <Typography
+                                variant="caption"
+                                color="error"
+                                component="span"
+                                sx={{ ml: 2 }}
+                              >
+                                ✓ Ya abierto
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  )
+                )}
               </List>
             </CardContent>
           </Card>
 
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Box sx={{ textAlign: "center", mt: 2 }}>
             <Button
               variant="outlined"
               color="error"
